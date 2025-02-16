@@ -1,7 +1,7 @@
-import * as vscode from 'vscode'
 import { parse } from '@typescript-eslint/parser'
 import { TSESTree } from '@typescript-eslint/types'
 import { VariableDeclaration } from '@typescript-eslint/types/dist/generated/ast-spec'
+import { DependencyGroups } from './dependency'
 
 const DEPENDENCY_KEYS = [
   'dependencies',
@@ -12,26 +12,7 @@ const DEPENDENCY_KEYS = [
   'resolutions', // yarn
 ]
 
-export interface DependencyGroups {
-  startLine: number
-  deps: Dependency[]
-}
-
-export interface Dependency {
-  dependencyName: string
-  currentVersion: string
-  line: number
-}
-
-export const getDependencyFromLine = (jsonAsString: string, line: number) => {
-  const dependencies = getDependencyInformation(jsonAsString)
-    .map((d) => d.deps)
-    .flat()
-
-  return dependencies.find((d) => d.line === line)
-}
-
-export const getDependencyInformation = (jsonAsString: string): DependencyGroups[] => {
+export const getPackageJsonDependencyInformation = (jsonAsString: string): DependencyGroups[] => {
   const jsonAsTypescript = `let tmp=${jsonAsString}`
 
   const ast = parse(jsonAsTypescript, {
@@ -73,9 +54,4 @@ function toDependencyGroup(dependencyProperty: TSESTree.Property): DependencyGro
     startLine: dependencyProperty.loc.start.line - 1,
     deps: d,
   }
-}
-
-export const isPackageJson = (document: vscode.TextDocument) => {
-  // Is checking both slashes necessary? Test on linux and mac.
-  return document.fileName.endsWith('\\package.json') || document.fileName.endsWith('/package.json')
 }
