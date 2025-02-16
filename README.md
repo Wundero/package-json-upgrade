@@ -2,6 +2,8 @@
 
 Shows available updates in package.json. Offers quick actions to guide you in your updating.
 
+Fork of the package by pgsandstrom but with enhanced support for pnpm and jsr.
+
 ## Preview
 
 The available updates are shown as color coded decoration to the right of each line.
