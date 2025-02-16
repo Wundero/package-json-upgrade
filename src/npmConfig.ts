@@ -1,4 +1,4 @@
-import * as config from 'libnpmconfig'
+import { execSync } from 'child_process'
 import * as npmRegistryFetch from 'npm-registry-fetch'
 import { getConfig } from './config'
 import { Dict } from './types'
@@ -15,21 +15,12 @@ export const getNpmConfig = (packageJsonPath: string): npmRegistryFetch.Options 
       conf = {}
       console.debug('Defaulting to empty config')
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-      conf = config
-        .read(
-          {
-            // here we can override config
-            // currently disable cache since it seems to be buggy with npm-registry-fetch
-            // the bug was supposedly fixed here: https://github.com/npm/npm-registry-fetch/issues/23
-            // but I still have issues, and not enough time to investigate
-            // TODO: Investigate why the cache causes issues
-            cache: null,
-            // registry: 'https://registry.npmjs.org',
-          },
-          { cwd: packageJsonPath },
-        )
-        .toJSON() as npmRegistryFetch.Options
+      const res = execSync(`npm config list --json`, {
+        cwd: packageJsonPath,
+        encoding: 'utf8',
+      })
+      conf = JSON.parse(res) as npmRegistryFetch.Options
+      delete conf.cache
       packageJsonPathToConfMap[packageJsonPath] = conf
     }
 
